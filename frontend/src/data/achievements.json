@@ -1,0 +1,23 @@
+[
+  {
+    "id": "1",
+    "title": "Dean's List - Fall 2024",
+    "description": "Achieved Dean's List recognition for maintaining a GPA above 3.8",
+    "date": "2024-12-15",
+    "type": "deans_list"
+  },
+  {
+    "id": "2",
+    "title": "AWS Certified Cloud Practitioner",
+    "description": "Amazon Web Services Cloud Practitioner certification",
+    "date": "2024-06-10",
+    "type": "certification"
+  },
+  {
+    "id": "3",
+    "title": "Best Undergraduate Research Award",
+    "description": "University-wide award for outstanding undergraduate research contribution",
+    "date": "2024-04-20",
+    "type": "award"
+  }
+]
