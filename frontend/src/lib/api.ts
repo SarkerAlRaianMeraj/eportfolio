@@ -1,4 +1,4 @@
-import { Project, Skill, Research, Achievement, ContactFormData, User } from './types';
+import { Project, Skill, Research, Achievement, ContactFormData, ContactMessage, User } from './types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
@@ -16,10 +16,16 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
     headers['Authorization'] = `Bearer ${token}`;
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 3000);
+
   const res = await fetch(`${API_URL}${endpoint}`, {
     headers,
+    signal: controller.signal,
     ...options,
   });
+
+  clearTimeout(timeout);
 
   if (!res.ok) {
     throw new Error(`API error: ${res.status}`);
@@ -172,4 +178,8 @@ export async function submitContact(data: ContactFormData): Promise<void> {
     method: 'POST',
     body: JSON.stringify(data),
   });
+}
+
+export async function getContactMessages(): Promise<ContactMessage[]> {
+  return fetchApi<ContactMessage[]>('/contact');
 }

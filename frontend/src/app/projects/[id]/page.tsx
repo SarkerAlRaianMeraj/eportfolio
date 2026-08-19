@@ -3,15 +3,36 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { getProject } from '@/lib/api';
 import { Project } from '@/lib/types';
 
-const categoryColors: Record<string, string> = {
-  web: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  ml: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-  research: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  iot: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-  other: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+const categoryGradients: Record<string, string> = {
+  web: 'from-blue-500 to-cyan-400',
+  ml: 'from-purple-500 to-pink-400',
+  research: 'from-green-500 to-emerald-400',
+  iot: 'from-orange-500 to-amber-400',
+  desktop: 'from-indigo-500 to-violet-400',
+  other: 'from-gray-500 to-slate-400',
+};
+
+const categoryBadgeColors: Record<string, string> = {
+  web: 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 border border-blue-100 dark:border-blue-900/50',
+  ml: 'bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border border-purple-100 dark:border-purple-900/50',
+  research: 'bg-green-50 text-green-700 dark:bg-green-950/50 dark:text-green-300 border border-green-100 dark:border-green-900/50',
+  iot: 'bg-orange-50 text-orange-700 dark:bg-orange-950/50 dark:text-orange-300 border border-orange-100 dark:border-orange-900/50',
+  desktop: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/50',
+  other: 'bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700',
+};
+
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.1, delayChildren: 0.2 } },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } },
 };
 
 export default function ProjectDetail() {
@@ -32,7 +53,7 @@ export default function ProjectDetail() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center pt-16 bg-white dark:bg-gray-900">
-        <div className="text-gray-500 dark:text-gray-400">Loading...</div>
+        <div className="inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -49,21 +70,33 @@ export default function ProjectDetail() {
   }
 
   return (
-    <div className="min-h-screen pt-20 pb-16 bg-white dark:bg-gray-900">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Link
-          href="/#projects"
-          className="inline-flex items-center text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-8 transition-colors"
-        >
-          ← Back to Projects
-        </Link>
+    <motion.div
+      className="min-h-screen pt-20 pb-16 bg-white dark:bg-gray-900 relative overflow-hidden"
+      initial="hidden"
+      animate="show"
+      variants={stagger}
+    >
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/5 dark:bg-blue-400/5 rounded-full blur-[120px] -translate-y-1/3 translate-x-1/3" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-purple-500/5 dark:bg-purple-400/5 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3" />
 
-        <div className="mb-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <motion.div variants={fadeUp}>
+          <Link
+            href="/#projects"
+            className="inline-flex items-center text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-8 transition-colors group"
+          >
+            <span className="group-hover:-translate-x-1 transition-transform duration-200">←</span>
+            <span className="ml-1">Back to Projects</span>
+          </Link>
+        </motion.div>
+
+        <motion.div className="mb-6" variants={fadeUp}>
           <div className="flex items-start justify-between gap-4 mb-4">
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
               {project.title}
             </h1>
-            <span className={`px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap ${categoryColors[project.category] || categoryColors.other}`}>
+            <span className={`px-3 py-1 rounded-lg text-sm font-medium whitespace-nowrap ${categoryBadgeColors[project.category] || categoryBadgeColors.other}`}>
               {project.category}
             </span>
           </div>
@@ -96,39 +129,42 @@ export default function ProjectDetail() {
               </a>
             )}
           </div>
-        </div>
+        </motion.div>
 
         {project.image_url && (
-          <div className="mb-8 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+          <motion.div className="mb-8 rounded-2xl overflow-hidden glass gradient-border" variants={fadeUp}>
             <img
               src={project.image_url}
               alt={project.title}
               className="w-full h-auto object-cover"
             />
-          </div>
+          </motion.div>
         )}
 
-        <div className="prose prose-gray dark:prose-invert max-w-none">
+        <motion.div className="prose prose-gray dark:prose-invert max-w-none" variants={fadeUp}>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">About this project</h2>
           <p className="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
             {project.description}
           </p>
-        </div>
+        </motion.div>
 
-        <div className="mt-8">
+        <motion.div className="mt-8" variants={fadeUp}>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Tech Stack</h2>
           <div className="flex flex-wrap gap-2">
-            {project.tech_stack.map((tech) => (
-              <span
+            {project.tech_stack.map((tech, i) => (
+              <motion.span
                 key={tech}
-                className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium"
+                className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium border border-gray-200/50 dark:border-gray-700/50"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 + i * 0.05, duration: 0.3 }}
               >
                 {tech}
-              </span>
+              </motion.span>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }

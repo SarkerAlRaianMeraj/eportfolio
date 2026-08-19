@@ -1,23 +1,30 @@
 [
   {
     "id": "1",
-    "title": "Dean's List - Fall 2024",
-    "description": "Achieved Dean's List recognition for maintaining a GPA above 3.8",
-    "date": "2024-12-15",
-    "type": "deans_list"
+    "title": "Codeforces Rating: 1200+",
+    "description": "Solved 1000+ problems across Codeforces, LightOJ, and other competitive programming platforms.",
+    "date": "2024-12-01",
+    "type": "competitive"
   },
   {
     "id": "2",
-    "title": "AWS Certified Cloud Practitioner",
-    "description": "Amazon Web Services Cloud Practitioner certification",
-    "date": "2024-06-10",
-    "type": "certification"
+    "title": "ICPC & NCPC Participant",
+    "description": "Participated in International Collegiate Programming Contest (ICPC) and National Collegiate Programming Contest (NCPC).",
+    "date": "2024-10-01",
+    "type": "competition"
   },
   {
     "id": "3",
-    "title": "Best Undergraduate Research Award",
-    "description": "University-wide award for outstanding undergraduate research contribution",
-    "date": "2024-04-20",
-    "type": "award"
+    "title": "Cisco IT Essentials Certification",
+    "description": "Earned Cisco IT Essentials certification covering computer hardware, software, networking fundamentals, and troubleshooting.",
+    "date": "2024-03-01",
+    "type": "certification"
+  },
+  {
+    "id": "4",
+    "title": "2 Major Software Projects",
+    "description": "Successfully developed and delivered two major software projects: Hostel Management System and Pharmacy Management System.",
+    "date": "2024-09-01",
+    "type": "project"
   }
 ]

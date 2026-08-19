@@ -8,10 +8,11 @@ import {
   getSkills, createSkill, updateSkill, deleteSkill,
   getResearch, createResearch, updateResearch, deleteResearch,
   getAchievements, createAchievement, updateAchievement, deleteAchievement,
+  getContactMessages,
 } from '@/lib/api';
-import { Project, Skill, Research as ResearchType, Achievement } from '@/lib/types';
+import { Project, Skill, Research as ResearchType, Achievement, ContactMessage } from '@/lib/types';
 
-type Tab = 'projects' | 'skills' | 'research' | 'achievements';
+type Tab = 'projects' | 'skills' | 'research' | 'achievements' | 'messages';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function AdminDashboard() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [research, setResearch] = useState<ResearchType[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,6 +31,7 @@ export default function AdminDashboard() {
         getSkills().then(setSkills),
         getResearch().then(setResearch),
         getAchievements().then(setAchievements),
+        getContactMessages().then(setMessages).catch(() => {}),
       ]))
       .catch(() => router.push('/admin'))
       .finally(() => setLoading(false));
@@ -52,6 +55,7 @@ export default function AdminDashboard() {
     { key: 'skills', label: 'Skills' },
     { key: 'research', label: 'Research' },
     { key: 'achievements', label: 'Achievements' },
+    { key: 'messages', label: 'Messages' },
   ];
 
   return (
@@ -98,6 +102,9 @@ export default function AdminDashboard() {
         )}
         {tab === 'achievements' && (
           <AchievementsTab achievements={achievements} setAchievements={setAchievements} />
+        )}
+        {tab === 'messages' && (
+          <MessagesTab messages={messages} />
         )}
       </div>
     </div>
@@ -150,6 +157,7 @@ function ProjectsTab({ projects, setProjects }: { projects: Project[]; setProjec
           <option value="ml">ML</option>
           <option value="research">Research</option>
           <option value="iot">IoT</option>
+          <option value="desktop">Desktop</option>
           <option value="other">Other</option>
         </select>
         <div className="flex gap-3">
@@ -314,7 +322,10 @@ function AchievementsTab({ achievements, setAchievements }: { achievements: Achi
           <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })} className="px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
             <option value="award">Award</option>
             <option value="certification">Certification</option>
-            <option value="deans_list">Dean's List</option>
+            <option value="deans_list">Dean&apos;s List</option>
+            <option value="competitive">Competitive Programming</option>
+            <option value="competition">Competition</option>
+            <option value="project">Project</option>
             <option value="other">Other</option>
           </select>
         </div>
@@ -336,6 +347,35 @@ function AchievementsTab({ achievements, setAchievements }: { achievements: Achi
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function MessagesTab({ messages }: { messages: ContactMessage[] }) {
+  if (messages.length === 0) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center">
+        <p className="text-gray-500 dark:text-gray-400">No messages yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {messages.map(m => (
+        <div key={m.id} className="bg-white dark:bg-gray-800 rounded-lg p-5">
+          <div className="flex items-start justify-between mb-2">
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white">{m.name}</h4>
+              <a href={`mailto:${m.email}`} className="text-sm text-blue-600 dark:text-blue-400">{m.email}</a>
+            </div>
+            <span className="text-xs text-gray-400 dark:text-gray-500">
+              {new Date(m.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+            </span>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 text-sm whitespace-pre-wrap">{m.message}</p>
+        </div>
+      ))}
     </div>
   );
 }

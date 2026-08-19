@@ -6,7 +6,7 @@ export interface Project {
   repo_url?: string;
   live_url?: string;
   image_url?: string;
-  category: 'web' | 'ml' | 'research' | 'iot' | 'other';
+  category: 'web' | 'ml' | 'research' | 'iot' | 'desktop' | 'other';
   featured: boolean;
   created_at: string;
 }
@@ -34,7 +34,7 @@ export interface Achievement {
   title: string;
   description?: string;
   date?: string;
-  type: 'award' | 'certification' | 'deans_list' | 'other';
+  type: 'award' | 'certification' | 'deans_list' | 'competitive' | 'competition' | 'project' | 'other';
   created_at: string;
 }
 
@@ -42,6 +42,14 @@ export interface ContactFormData {
   name: string;
   email: string;
   message: string;
+}
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  created_at: string;
 }
 
 export interface User {

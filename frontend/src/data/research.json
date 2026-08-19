@@ -1,20 +1,11 @@
 [
   {
     "id": "1",
-    "title": "Deep Learning for Medical Image Classification",
-    "authors": ["Your Name", "Dr. Smith", "Dr. Johnson"],
-    "publication_venue": "IEEE International Conference on Medical Imaging",
-    "date": "2024-03-15",
-    "doi_url": "https://doi.org/10.1109/example.2024.123456",
-    "abstract": "This paper presents a novel approach to medical image classification using transfer learning with ResNet50 architecture. We achieve 94% accuracy on chest X-ray datasets, demonstrating the potential of deep learning in clinical decision support systems."
-  },
-  {
-    "id": "2",
-    "title": "Real-time Object Detection for Autonomous Vehicles",
-    "authors": ["Your Name", "Prof. Lee"],
-    "publication_venue": "International Journal of Computer Vision",
-    "date": "2024-01-20",
-    "doi_url": "https://doi.org/10.1007/example.2024.789012",
-    "abstract": "We propose a lightweight neural network architecture for real-time object detection that achieves 60 FPS on embedded systems while maintaining competitive accuracy compared to state-of-the-art models."
+    "title": "Bangla Healthcare Technologies",
+    "authors": ["Sarker Al Raian Meraj"],
+    "publication_venue": "AIUB Research",
+    "date": "2024-06-01",
+    "doi_url": "",
+    "abstract": "Research on Bangla healthcare technologies involving data collection, analysis, and experimentation to improve healthcare accessibility and technology adoption in Bangladesh."
   }
 ]

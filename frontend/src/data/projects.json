@@ -1,33 +1,33 @@
 [
   {
     "id": "1",
-    "title": "E-Commerce Platform",
-    "description": "A full-stack e-commerce solution with real-time inventory management, payment processing via Stripe, and an admin dashboard for analytics.",
-    "tech_stack": ["Next.js", "TypeScript", "Tailwind CSS", "NestJS", "PostgreSQL", "Stripe"],
-    "repo_url": "https://github.com/username/ecommerce",
-    "live_url": "https://ecommerce-demo.vercel.app",
-    "category": "web",
+    "title": "Hostel Management System",
+    "description": "Desktop application for managing students, rooms, staff, and payments with CRUD operations and SQL database integration. Designed using OOP principles and a clean modular structure.",
+    "tech_stack": ["C#", "SQL", "WinForms"],
+    "repo_url": "https://github.com/SarkerAlRaianMeraj/hostel-management",
+    "category": "desktop",
     "featured": true,
-    "created_at": "2024-01-15T00:00:00.000Z"
+    "created_at": "2024-06-01T00:00:00.000Z"
   },
   {
     "id": "2",
-    "title": "Medical Image Classifier",
-    "description": "Deep learning model for classifying medical images using transfer learning with ResNet50, achieving 94% accuracy on chest X-ray dataset.",
-    "tech_stack": ["Python", "PyTorch", "FastAPI", "OpenCV", "NumPy"],
-    "repo_url": "https://github.com/username/medical-classifier",
-    "category": "ml",
+    "title": "Pharmacy Management System",
+    "description": "Desktop system for managing medicine inventory, sales, and billing with efficient data handling using structured OOP modules and intuitive user interfaces for smooth workflow.",
+    "tech_stack": ["Java", "OOP"],
+    "repo_url": "https://github.com/SarkerAlRaianMeraj/pharmacy-management",
+    "category": "desktop",
     "featured": true,
-    "created_at": "2024-02-20T00:00:00.000Z"
+    "created_at": "2024-09-01T00:00:00.000Z"
   },
   {
     "id": "3",
-    "title": "Real-time Chat Application",
-    "description": "WebSocket-based chat app with rooms, typing indicators, and message history. Supports file sharing and emoji reactions.",
-    "tech_stack": ["React", "Socket.io", "Node.js", "Redis", "MongoDB"],
-    "live_url": "https://chat-demo.vercel.app",
+    "title": "E-Portfolio Website",
+    "description": "Personal portfolio website built with Next.js and NestJS, featuring project showcases, blog, admin dashboard, and dark mode. Deployed on Vercel with PostgreSQL backend.",
+    "tech_stack": ["Next.js", "NestJS", "TypeScript", "PostgreSQL", "Tailwind CSS"],
+    "repo_url": "https://github.com/SarkerAlRaianMeraj/eportfolio",
+    "live_url": "https://meraj.dev",
     "category": "web",
-    "featured": false,
-    "created_at": "2024-03-10T00:00:00.000Z"
+    "featured": true,
+    "created_at": "2025-01-01T00:00:00.000Z"
   }
 ]

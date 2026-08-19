@@ -5,6 +5,7 @@ export enum ProjectCategory {
   ML = 'ml',
   RESEARCH = 'research',
   IOT = 'iot',
+  DESKTOP = 'desktop',
   OTHER = 'other',
 }
 

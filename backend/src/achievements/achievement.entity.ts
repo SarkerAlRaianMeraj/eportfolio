@@ -4,6 +4,9 @@ export enum AchievementType {
   AWARD = 'award',
   CERTIFICATION = 'certification',
   DEANS_LIST = 'deans_list',
+  COMPETITIVE = 'competitive',
+  COMPETITION = 'competition',
+  PROJECT = 'project',
   OTHER = 'other',
 }
 
