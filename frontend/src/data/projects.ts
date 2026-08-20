@@ -17,7 +17,7 @@ export const projectsFallback: Project[] = [
     title: 'E-Portfolio Website',
     description: 'Personal portfolio website built with Next.js and NestJS, featuring project showcases, blog, admin dashboard, and dark mode. Deployed on Vercel with PostgreSQL backend.',
     tech_stack: ['Next.js', 'NestJS', 'TypeScript', 'PostgreSQL', 'Tailwind CSS'],
-    repo_url: 'https://github.com/SarkerAlRaianMeraj/eportfolio',
+    repo_url: 'https://github.com/SarkerAlRaianMeraj/eportfolio.git',
     live_url: 'https://frontend-ten-zeta-41.vercel.app',
     category: 'web',
     featured: true,
