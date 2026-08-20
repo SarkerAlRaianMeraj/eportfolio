@@ -2,7 +2,7 @@ export const siteConfig = {
   name: 'Sarker Al Raian Meraj',
   title: 'Sarker Al Raian Meraj | Portfolio',
   description: 'Full-Stack Web Developer and 3rd-year Computer Science student at AIUB with hands-on experience in React.js, Next.js, NestJS, and PostgreSQL. Passionate about building scalable web applications and solving real-world problems.',
-  url: 'https://meraj.dev',
+  url: 'https://frontend-ten-zeta-41.vercel.app',
   email: 'merajsarker123456@gmail.com',
   github: 'https://github.com/SarkerAlRaianMeraj',
   linkedin: 'https://linkedin.com/in/sarker-al-raian-meraj',

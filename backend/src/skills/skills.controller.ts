@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { SkillsService } from './skills.service';
 import { CreateSkillDto } from './create-skill.dto';
@@ -11,6 +20,11 @@ export class SkillsController {
   @Get()
   findAll() {
     return this.skillsService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.skillsService.findOne(id);
   }
 
   @Post()

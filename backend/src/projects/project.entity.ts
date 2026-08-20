@@ -1,5 +1,3 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
-
 export enum ProjectCategory {
   WEB = 'web',
   ML = 'ml',
@@ -9,39 +7,15 @@ export enum ProjectCategory {
   OTHER = 'other',
 }
 
-@Entity('projects')
-export class Project {
-  @PrimaryGeneratedColumn('uuid')
+export interface Project {
   id: string;
-
-  @Column()
   title: string;
-
-  @Column('text')
   description: string;
-
-  @Column('simple-array', { nullable: true })
   tech_stack: string[];
-
-  @Column({ nullable: true })
-  repo_url: string;
-
-  @Column({ nullable: true })
-  live_url: string;
-
-  @Column({ nullable: true })
-  image_url: string;
-
-  @Column({
-    type: 'enum',
-    enum: ProjectCategory,
-    default: ProjectCategory.OTHER,
-  })
+  repo_url: string | null;
+  live_url: string | null;
+  image_url: string | null;
   category: ProjectCategory;
-
-  @Column({ default: false })
   featured: boolean;
-
-  @CreateDateColumn()
-  created_at: Date;
+  created_at: string;
 }

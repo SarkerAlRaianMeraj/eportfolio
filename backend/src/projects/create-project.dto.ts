@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsBoolean, IsEnum, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsEnum,
+  IsArray,
+} from 'class-validator';
 import { ProjectCategory } from './project.entity';
 
 export class CreateProjectDto {

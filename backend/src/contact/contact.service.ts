@@ -1,27 +1,38 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { ContactMessage } from './contact.entity';
 import { CreateContactDto } from './create-contact.dto';
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 @Injectable()
 export class ContactService {
   private readonly logger = new Logger(ContactService.name);
+  private messages: ContactMessage[] = [];
+  private nextId = 1;
 
-  constructor(
-    @InjectRepository(ContactMessage)
-    private contactRepository: Repository<ContactMessage>,
-    private configService: ConfigService,
-  ) {}
+  constructor(private configService: ConfigService) {}
 
-  async create(createContactDto: CreateContactDto): Promise<ContactMessage> {
-    const message = this.contactRepository.create(createContactDto);
-    const saved = await this.contactRepository.save(message);
+  create(createContactDto: CreateContactDto): ContactMessage {
+    const message: ContactMessage = {
+      id: String(this.nextId++),
+      name: createContactDto.name,
+      email: createContactDto.email,
+      message: createContactDto.message,
+      created_at: new Date().toISOString(),
+    };
+    this.messages.push(message);
 
-    await this.sendEmailNotification(createContactDto);
+    void this.sendEmailNotification(createContactDto);
 
-    return saved;
+    return { ...message };
   }
 
   private async sendEmailNotification(dto: CreateContactDto): Promise<void> {
@@ -37,16 +48,20 @@ export class ContactService {
       const { Resend } = await import('resend');
       const resend = new Resend(apiKey);
 
+      const safeName = escapeHtml(dto.name);
+      const safeEmail = escapeHtml(dto.email);
+      const safeMessage = escapeHtml(dto.message);
+
       await resend.emails.send({
         from: 'Portfolio Contact <onboarding@resend.dev>',
         to: contactEmail,
-        subject: `New Contact from ${dto.name}`,
+        subject: `New Contact from ${safeName}`,
         html: `
           <h2>New Contact Form Submission</h2>
-          <p><strong>Name:</strong> ${dto.name}</p>
-          <p><strong>Email:</strong> ${dto.email}</p>
+          <p><strong>Name:</strong> ${safeName}</p>
+          <p><strong>Email:</strong> ${safeEmail}</p>
           <p><strong>Message:</strong></p>
-          <p>${dto.message}</p>
+          <p>${safeMessage}</p>
         `,
       });
 
@@ -56,7 +71,10 @@ export class ContactService {
     }
   }
 
-  async findAll(): Promise<ContactMessage[]> {
-    return this.contactRepository.find({ order: { created_at: 'DESC' } });
+  findAll(): ContactMessage[] {
+    return [...this.messages].sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
   }
 }

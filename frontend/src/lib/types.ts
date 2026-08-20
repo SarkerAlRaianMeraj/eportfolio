@@ -14,7 +14,7 @@ export interface Project {
 export interface Skill {
   id: string;
   name: string;
-  category: 'frontend' | 'backend' | 'ml' | 'languages' | 'tools';
+  category: 'frontend' | 'backend' | 'ml' | 'languages' | 'tools' | 'os' | 'concepts' | 'professional';
 }
 
 export interface Research {

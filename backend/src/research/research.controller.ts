@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ResearchService } from './research.service';
 import { CreateResearchDto } from './create-research.dto';
@@ -26,7 +35,10 @@ export class ResearchController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  update(@Param('id') id: string, @Body() updateResearchDto: UpdateResearchDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateResearchDto: UpdateResearchDto,
+  ) {
     return this.researchService.update(id, updateResearchDto);
   }
 

@@ -17,21 +17,11 @@ export default function Home() {
       <FadeIn>
         <About />
       </FadeIn>
-      <FadeIn delay={100}>
-        <Skills />
-      </FadeIn>
-      <FadeIn delay={200}>
-        <Projects />
-      </FadeIn>
-      <FadeIn delay={100}>
-        <Research />
-      </FadeIn>
-      <FadeIn delay={200}>
-        <Achievements />
-      </FadeIn>
-      <FadeIn delay={100}>
-        <Contact />
-      </FadeIn>
+      <Skills />
+      <Projects />
+      <Research />
+      <Achievements />
+      <Contact />
       <Footer />
     </main>
   );

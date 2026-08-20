@@ -10,7 +10,7 @@ const fadeUp = {
 
 export default function About() {
   return (
-    <section id="about" className="py-20 bg-white dark:bg-gray-900 section-divider">
+    <section id="sarker-al-raian-meraj-about" className="py-20 bg-white dark:bg-gray-900 section-divider">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.h2
           className="text-3xl font-bold mb-12 text-gradient"

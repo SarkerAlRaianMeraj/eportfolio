@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { getProjects } from '@/lib/api';
 import { Project } from '@/lib/types';
+import { projectsFallback } from '@/data/projects';
 
 const categoryGradients: Record<string, string> = {
   web: 'from-blue-500 to-cyan-400',
@@ -34,15 +34,20 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } },
 };
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+
 export default function Projects() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<Project[]>(projectsFallback as Project[]);
 
   useEffect(() => {
-    getProjects().then(setProjects);
+    fetch(`${API_URL}/projects`, { signal: AbortSignal.timeout(3000) })
+      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+      .then((data: Project[]) => { if (data.length > 0) setProjects(data); })
+      .catch(() => {});
   }, []);
 
   return (
-    <section id="projects" className="py-20 bg-white dark:bg-gray-900 relative overflow-hidden section-divider">
+    <section id="sarker-al-raian-meraj-projects" className="py-20 bg-white dark:bg-gray-900 relative overflow-hidden section-divider">
       {/* Decorative gradient blobs */}
       <div className="absolute top-1/2 left-0 w-80 h-80 bg-blue-500/5 dark:bg-blue-400/5 rounded-full blur-[120px] -translate-y-1/2 -translate-x-1/2" />
       <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/5 dark:bg-purple-400/5 rounded-full blur-[100px] translate-x-1/3 -translate-y-1/3" />

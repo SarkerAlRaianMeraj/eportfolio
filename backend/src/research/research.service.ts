@@ -1,41 +1,70 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { Research } from './research.entity';
 import { CreateResearchDto } from './create-research.dto';
 import { UpdateResearchDto } from './update-research.dto';
 
+const seed: Research[] = [
+  {
+    id: '1',
+    title: 'Bangla Healthcare Technologies',
+    authors: ['Sarker Al Raian Meraj'],
+    publication_venue: 'AIUB Research',
+    date: '2024-06-01',
+    doi_url: null,
+    pdf_url: null,
+    abstract:
+      'Research on Bangla healthcare technologies involving data collection, analysis, and experimentation to improve healthcare accessibility and technology adoption in Bangladesh.',
+    created_at: '2024-06-01T00:00:00.000Z',
+  },
+];
+
 @Injectable()
 export class ResearchService {
-  constructor(
-    @InjectRepository(Research)
-    private researchRepository: Repository<Research>,
-  ) {}
+  private items: Research[] = [...seed];
+  private nextId = 2;
 
-  async findAll(): Promise<Research[]> {
-    return this.researchRepository.find({ order: { date: 'DESC' } });
+  findAll(): Research[] {
+    return [...this.items];
   }
 
-  async findOne(id: string): Promise<Research> {
-    const research = await this.researchRepository.findOne({ where: { id } });
-    if (!research) {
+  findOne(id: string): Research {
+    const item = this.items.find((r) => r.id === id);
+    if (!item) {
       throw new NotFoundException(`Research with ID ${id} not found`);
     }
-    return research;
+    return { ...item };
   }
 
-  async create(createResearchDto: CreateResearchDto): Promise<Research> {
-    const research = this.researchRepository.create(createResearchDto);
-    return this.researchRepository.save(research);
+  create(dto: CreateResearchDto): Research {
+    const item: Research = {
+      id: String(this.nextId++),
+      title: dto.title,
+      authors: dto.authors ?? [],
+      publication_venue: dto.publication_venue ?? null,
+      date: dto.date ?? null,
+      doi_url: dto.doi_url ?? null,
+      pdf_url: dto.pdf_url ?? null,
+      abstract: dto.abstract ?? null,
+      created_at: new Date().toISOString(),
+    };
+    this.items.push(item);
+    return { ...item };
   }
 
-  async update(id: string, updateResearchDto: UpdateResearchDto): Promise<Research> {
-    await this.researchRepository.update(id, updateResearchDto);
-    return this.findOne(id);
+  update(id: string, dto: UpdateResearchDto): Research {
+    const idx = this.items.findIndex((r) => r.id === id);
+    if (idx === -1) {
+      throw new NotFoundException(`Research with ID ${id} not found`);
+    }
+    this.items[idx] = { ...this.items[idx], ...dto };
+    return { ...this.items[idx] };
   }
 
-  async remove(id: string): Promise<void> {
-    const research = await this.findOne(id);
-    await this.researchRepository.remove(research);
+  remove(id: string): void {
+    const idx = this.items.findIndex((r) => r.id === id);
+    if (idx === -1) {
+      throw new NotFoundException(`Research with ID ${id} not found`);
+    }
+    this.items.splice(idx, 1);
   }
 }

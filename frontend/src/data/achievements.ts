@@ -1,0 +1,36 @@
+import { Achievement } from '@/lib/types';
+
+export const achievementsFallback: Achievement[] = [
+  {
+    id: '1',
+    title: 'Codeforces Rating: 1200+',
+    description: 'Solved 1000+ problems across Codeforces, LightOJ, and other competitive programming platforms.',
+    date: '2024-12-01',
+    type: 'competitive',
+    created_at: '2024-12-01T00:00:00.000Z',
+  },
+  {
+    id: '2',
+    title: 'ICPC & NCPC Participant',
+    description: 'Participated in International Collegiate Programming Contest (ICPC) and National Collegiate Programming Contest (NCPC).',
+    date: '2024-10-01',
+    type: 'competition',
+    created_at: '2024-10-01T00:00:00.000Z',
+  },
+  {
+    id: '3',
+    title: 'Cisco IT Essentials Certification',
+    description: 'Earned Cisco IT Essentials certification covering computer hardware, software, networking fundamentals, and troubleshooting.',
+    date: '2024-03-01',
+    type: 'certification',
+    created_at: '2024-03-01T00:00:00.000Z',
+  },
+  {
+    id: '4',
+    title: '2 Major Software Projects',
+    description: 'Successfully developed and delivered two major software projects: Hostel Management System and Pharmacy Management System.',
+    date: '2024-09-01',
+    type: 'project',
+    created_at: '2024-09-01T00:00:00.000Z',
+  },
+];

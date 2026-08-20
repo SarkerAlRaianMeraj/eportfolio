@@ -6,12 +6,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/lib/theme-provider';
 
 const navLinks = [
-  { href: '#about', label: 'About' },
-  { href: '#skills', label: 'Skills' },
-  { href: '#projects', label: 'Projects' },
-  { href: '#research', label: 'Research' },
-  { href: '#achievements', label: 'Achievements' },
-  { href: '#contact', label: 'Contact' },
+  { href: '#sarker-al-raian-meraj-about', label: 'About' },
+  { href: '#sarker-al-raian-meraj-skills', label: 'Skills' },
+  { href: '#sarker-al-raian-meraj-projects', label: 'Projects' },
+  { href: '#sarker-al-raian-meraj-research', label: 'Research' },
+  { href: '#sarker-al-raian-meraj-achievements', label: 'Achievements' },
+  { href: '#sarker-al-raian-meraj-contact', label: 'Contact' },
 ];
 
 export default function Navbar() {

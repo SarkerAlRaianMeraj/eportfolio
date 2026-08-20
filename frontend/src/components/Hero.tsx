@@ -74,7 +74,7 @@ export default function Hero() {
 
         <motion.div className="flex flex-col sm:flex-row gap-4 justify-center" variants={fadeUp}>
           <motion.a
-            href="#projects"
+            href="#sarker-al-raian-meraj-projects"
             className="group relative px-8 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium overflow-hidden btn-glow"
             whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(37, 99, 235, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)' }}
             whileTap={{ scale: 0.98 }}
@@ -83,7 +83,7 @@ export default function Hero() {
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </motion.a>
           <motion.a
-            href="#contact"
+            href="#sarker-al-raian-meraj-contact"
             className="px-8 py-3.5 glass gradient-border text-gray-700 dark:text-gray-300 rounded-xl font-medium"
             whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(37, 99, 235, 0.15)' }}
             whileTap={{ scale: 0.98 }}

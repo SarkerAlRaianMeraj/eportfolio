@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { getAchievements } from '@/lib/api';
 import { Achievement } from '@/lib/types';
+import { achievementsFallback } from '@/data/achievements';
 
 const typeLabels: Record<string, string> = {
   award: 'Award',
@@ -35,17 +35,22 @@ const itemVariant = {
   show: { opacity: 1, x: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } },
 };
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+
 export default function Achievements() {
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [achievements, setAchievements] = useState<Achievement[]>(achievementsFallback as Achievement[]);
 
   useEffect(() => {
-    getAchievements().then(setAchievements);
+    fetch(`${API_URL}/achievements`, { signal: AbortSignal.timeout(3000) })
+      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+      .then((data: Achievement[]) => { if (data.length > 0) setAchievements(data); })
+      .catch(() => {});
   }, []);
 
   if (achievements.length === 0) return null;
 
   return (
-    <section id="achievements" className="py-20 bg-white dark:bg-gray-900 relative overflow-hidden section-divider">
+    <section id="sarker-al-raian-meraj-achievements" className="py-20 bg-white dark:bg-gray-900 relative overflow-hidden section-divider">
       <div className="absolute top-0 left-1/3 w-80 h-80 bg-purple-500/5 dark:bg-purple-400/5 rounded-full blur-[120px] -translate-y-1/2" />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">

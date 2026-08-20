@@ -7,22 +7,22 @@ Personal ePortfolio website showcasing projects, skills, research, and achieveme
 | Layer | Technology |
 |-------|-----------|
 | **Frontend** | Next.js 16, React 19, TypeScript 5, Tailwind CSS 4, Framer Motion |
-| **Backend** | NestJS 11, TypeORM, PostgreSQL |
+| **Backend** | NestJS 11, TypeScript (in-memory storage, no database) |
 | **Auth** | JWT (passport-jwt), bcrypt |
-| **Deployment** | Vercel (frontend), Render (backend), Neon (PostgreSQL) |
+| **Deployment** | Vercel (frontend), Render or any Node host (backend) |
 
 ## Features
 
 ### Phase 1 — MVP
 - Responsive single-page portfolio (Hero, About, Skills, Projects, Research, Achievements, Contact, Footer)
 - NestJS REST API with full CRUD for projects, skills, research, achievements
-- Contact form with message persistence
-- Static JSON fallback when API is unavailable
+- Contact form with in-memory message storage
+- TypeScript module fallback when API is unavailable (instant content load)
 
 ### Phase 2 — Auth & Admin
 - JWT authentication (login, profile)
 - Admin dashboard (`/admin`) with CRUD for all content modules
-- Admin user auto-seeded on backend startup
+- Admin user auto-seeded on backend startup (configurable via env vars)
 - Dark/light mode toggle with localStorage persistence
 - Project detail pages (`/projects/[id]`)
 
@@ -44,6 +44,9 @@ Personal ePortfolio website showcasing projects, skills, research, and achieveme
 - Messages tab in admin dashboard
 - Environment config cleanup
 - JWT secret validation (throws if unset)
+- Backend: XSS-safe email output in contact service
+- Backend: strict TypeScript options (`noImplicitAny`, `strictBindCallApply`, `noFallthroughCasesInSwitch`)
+- Backend: `update()` methods return `null` when entity not found (not swallowed errors)
 
 ### Phase 5 — Animations
 - Framer Motion throughout all components
@@ -57,6 +60,7 @@ Personal ePortfolio website showcasing projects, skills, research, and achieveme
 - Contact: staggered form fields, AnimatePresence on status messages
 - 404: spring entrance on number, staggered fade
 - Project detail: content stagger, tech badge pop-in
+- `FadeIn` wrapper only on About section (other sections render directly to avoid double `whileInView` conflicts)
 
 ### Phase 6 — Visual Polish
 - **Glassmorphism** cards (`backdrop-blur` + semi-transparent bg)
@@ -73,6 +77,22 @@ Personal ePortfolio website showcasing projects, skills, research, and achieveme
 - **"Open to opportunities"** badge pill in hero
 - **Scroll indicator** with bounce animation
 - **Section dividers** with gradient accent lines
+
+## Architecture Notes
+
+### Backend — In-Memory Storage
+The backend uses **no database**. All data is stored in-memory with seed data initialized on startup. This means:
+- Data resets on server restart (by design — the frontend has its own fallback data)
+- No `DATABASE_URL` or PostgreSQL configuration needed
+- No TypeORM or database driver dependencies
+
+### Frontend — Fallback-First Data Loading
+Components load content **instantly** from local TypeScript modules (`src/data/*.ts`), then optionally try the API in the background. This ensures:
+- Content is always visible even when the backend is offline
+- No empty sections or loading spinners for portfolio content
+- API data replaces fallback if available (with 3s timeout)
+
+**Important**: Fallback data files use `.ts` (not `.json`) because Next.js 16 Turbopack silently fails to import JSON default exports during SSR. Always use typed `.ts` modules for fallback data.
 
 ## Project Structure
 
@@ -102,7 +122,7 @@ eportfolio/
 │       │   ├── Navbar.tsx          # Fixed nav, glassmorphism, mobile menu
 │       │   ├── Hero.tsx            # Hero section, mesh gradients, shimmer text
 │       │   ├── About.tsx           # Bio, education, languages
-│       │   ├── Skills.tsx          # Skills by category, glass cards
+│       │   ├── Skills.tsx          # Skills by category (48 skills, 8 categories)
 │       │   ├── Projects.tsx        # Project cards grid
 │       │   ├── Research.tsx        # Research articles
 │       │   ├── Achievements.tsx    # Timeline with glowing dots
@@ -110,38 +130,44 @@ eportfolio/
 │       │   ├── Footer.tsx          # Footer with gradient separator
 │       │   └── FadeIn.tsx          # Framer Motion scroll-reveal wrapper
 │       ├── data/
-│       │   ├── projects.json       # Fallback project data
-│       │   ├── skills.json         # Fallback skill data
-│       │   ├── research.json       # Fallback research data
-│       │   └── achievements.json   # Fallback achievement data
+│       │   ├── projects.ts         # Fallback project data (typed TS module)
+│       │   ├── skills.ts           # Fallback skill data (48 skills, typed TS module)
+│       │   ├── research.ts         # Fallback research data (typed TS module)
+│       │   └── achievements.ts     # Fallback achievement data (typed TS module)
 │       └── lib/
-│           ├── api.ts              # API client with timeout + JSON fallback
+│           ├── api.ts              # API client with 3s timeout
 │           ├── config.ts           # Site metadata (name, email, socials, education)
 │           ├── types.ts            # TypeScript interfaces
 │           ├── theme-provider.tsx  # Dark/light mode context
 │           └── use-in-view.ts      # IntersectionObserver hook
 │
 ├── backend/
-│   ├── .env                        # Environment variables
+│   ├── .env                        # Environment variables (no DATABASE_URL needed)
 │   └── src/
 │       ├── main.ts                 # Bootstrap, CORS, ValidationPipe, global prefix /api
-│       ├── app.module.ts           # Root module, DB config, admin seed
+│       ├── app.module.ts           # Root module (no database, no OnModuleInit)
 │       ├── auth/
-│       │   ├── auth.module.ts
+│       │   ├── auth.module.ts      # JWT via ConfigService
 │       │   ├── auth.controller.ts  # POST /login, GET /profile
 │       │   ├── auth.service.ts     # bcrypt, JWT sign
-│       │   ├── jwt.strategy.ts     # Passport JWT strategy
+│       │   ├── jwt.strategy.ts     # Passport JWT strategy via ConfigService
 │       │   ├── jwt-auth.guard.ts
 │       │   └── login.dto.ts
 │       ├── users/
 │       │   ├── users.module.ts
-│       │   ├── users.service.ts    # seedAdmin()
+│       │   ├── users.service.ts    # In-memory user store, seedAdmin()
 │       │   └── user.entity.ts
-│       ├── projects/               # CRUD module (GET public, CUD guarded)
-│       ├── skills/                 # CRUD module (GET public, CUD guarded)
-│       ├── research/               # CRUD module (GET public, CUD guarded)
-│       ├── achievements/           # CRUD module (GET public, CUD guarded)
-│       └── contact/                # POST public, GET guarded
+│       ├── projects/
+│       │   └── projects.service.ts # In-memory storage (3 seed projects)
+│       ├── skills/
+│       │   ├── skills.service.ts   # In-memory storage (48 seed skills)
+│       │   └── skill.entity.ts     # SkillCategory enum (8 values)
+│       ├── research/
+│       │   └── research.service.ts # In-memory storage (1 seed entry)
+│       ├── achievements/
+│       │   └── achievements.service.ts # In-memory storage (4 seed entries)
+│       └── contact/
+│           └── contact.service.ts  # In-memory message storage, XSS-safe
 │
 ├── .env.example                    # Template for all env vars
 └── README.md
@@ -151,7 +177,6 @@ eportfolio/
 
 ### Prerequisites
 - Node.js 18+
-- PostgreSQL database (local or Neon/Supabase)
 
 ### Installation
 
@@ -162,13 +187,15 @@ cd eportfolio
 
 # Backend
 cd backend
-cp ../.env.example .env    # Fill in DATABASE_URL, JWT_SECRET, etc.
+cp ../.env.example .env    # Fill in JWT_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD
 npm install
 
 # Frontend
 cd ../frontend
 npm install
 ```
+
+No database setup required — the backend runs entirely in-memory.
 
 ### Development
 
@@ -194,16 +221,13 @@ Open http://localhost:3000
 
 ### Backend (`backend/.env`)
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@host:5432/eportfolio` |
-| `JWT_SECRET` | Secret for JWT signing | `your_strong_random_string` |
-| `RESEND_API_KEY` | Resend API key for email | `re_xxxxx` |
-| `CONTACT_EMAIL` | Email to receive contact messages | `you@example.com` |
-| `ADMIN_EMAIL` | Admin login email | `admin@portfolio.com` |
-| `ADMIN_PASSWORD` | Admin login password | `admin123` |
-| `PORT` | Backend port | `3001` |
-| `FRONTEND_URL` | Frontend URL for CORS | `http://localhost:3000` |
+| Variable | Description | Example | Required |
+|----------|-------------|---------|----------|
+| `JWT_SECRET` | Secret for JWT signing | `your_strong_random_string` | Yes |
+| `ADMIN_EMAIL` | Admin login email | `admin@portfolio.com` | No (default provided) |
+| `ADMIN_PASSWORD` | Admin login password | `admin123` | No (default provided) |
+| `PORT` | Backend port | `3001` | No (default: 3001) |
+| `FRONTEND_URL` | Frontend URL for CORS | `http://localhost:3000` | No (default provided) |
 
 ### Frontend (`frontend/.env.local`)
 
@@ -219,6 +243,7 @@ Open http://localhost:3000
 | GET | `/api/projects` | List all projects |
 | GET | `/api/projects/:id` | Get project by ID |
 | GET | `/api/skills` | List all skills |
+| GET | `/api/skills/:id` | Get skill by ID |
 | GET | `/api/research` | List all research |
 | GET | `/api/achievements` | List all achievements |
 | POST | `/api/contact` | Submit contact message |
@@ -242,6 +267,55 @@ Open http://localhost:3000
 | DELETE | `/api/achievements/:id` | Delete achievement |
 | GET | `/api/contact` | List all contact messages |
 
+## Content Management
+
+All content is managed via the admin dashboard at `/admin/dashboard`.
+
+- **Projects**: Title, description, tech stack (comma-separated), repo URL, live URL, category
+- **Skills**: Name and category (frontend/backend/ml/languages/tools/os/concepts/professional)
+- **Research**: Title, authors (comma-separated), venue, date, DOI URL, abstract
+- **Achievements**: Title, description, date, type (award/certification/deans_list/competitive/competition/project/other)
+- **Messages**: View-only list of contact form submissions
+
+The frontend uses TypeScript modules in `src/data/` as fallback when the backend is unavailable. Edit these files to update fallback content.
+
+## Skills Categories
+
+48 skills across 8 categories:
+
+| Category | Skills | Count |
+|----------|--------|-------|
+| Frontend | React.js, Next.js, TypeScript, Tailwind CSS, HTML, CSS | 6 |
+| Backend | NestJS, REST API Development, PostgreSQL, Oracle, SQL, File Systems | 6 |
+| Languages | Python, Java, C++, JavaScript, C#, R, PHP | 7 |
+| Machine Learning | ML, NLP, Statistical Analysis (R), Data Visualization, Data Preprocessing | 5 |
+| Tools | Git, GitHub, VS Code, Visual Studio, MATLAB, RStudio, XAMPP, AutoCAD, Cisco Packet Tracer, Code::Blocks | 10 |
+| Operating Systems | Windows, Linux | 2 |
+| Concepts | OOP, DSA, DBMS, Software Engineering, API Integration, Debugging, C++ with GLUT/OpenGL, AI-Assisted Development | 8 |
+| Professional | Agile/Scrum, SDLC Management, Technical Documentation, Professional English Communication | 4 |
+
+## Key Files Quick Reference
+
+| File | Purpose |
+|------|---------|
+| `frontend/src/lib/config.ts` | Site name, email, socials, education |
+| `frontend/src/data/*.ts` | Fallback content data (typed TS modules, NOT JSON) |
+| `frontend/src/app/globals.css` | All CSS animations, glass, glow, gradient utilities |
+| `frontend/src/components/FadeIn.tsx` | Reusable scroll-reveal wrapper |
+| `frontend/src/lib/types.ts` | All TypeScript interfaces (Skill, Project, Research, Achievement) |
+| `backend/.env` | All backend configuration |
+| `backend/src/app.module.ts` | Module wiring (no database) |
+
+## Known Gotchas
+
+1. **Do not use `.json` for fallback data.** Next.js 16 Turbopack silently fails to import JSON default exports during SSR, resulting in empty sections. Always use typed `.ts` modules.
+
+2. **`FadeIn` wrapper causes double animation conflicts.** Only wrap components in `FadeIn` if they don't use their own `whileInView` Framer Motion animations. Currently only `About` uses `FadeIn`.
+
+3. **`NEXT_PUBLIC_API_URL` is baked into the client bundle at build time.** Changing `.env.local` requires restarting the dev server or rebuilding.
+
+4. **Backend data is ephemeral.** All data resets on server restart. The frontend fallback data ensures the portfolio always displays content.
+
 ## Deployment
 
 ### Frontend (Vercel)
@@ -251,37 +325,12 @@ Open http://localhost:3000
 4. Add env var: `NEXT_PUBLIC_API_URL=https://your-backend.onrender.com/api`
 5. Deploy
 
-### Backend (Render)
-1. Create a new Web Service on Render
+### Backend (Render or any Node host)
+1. Create a new Web Service
 2. Connect GitHub repo
 3. Set build command: `cd backend && npm install && npm run build`
 4. Set start command: `cd backend && npm run start:prod`
-5. Add all backend env vars
+5. Add backend env vars (`JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`)
 6. Deploy
 
-### Database (Neon)
-1. Create a free PostgreSQL database on Neon
-2. Copy the connection string to `DATABASE_URL`
-
-## Content Management
-
-All content is managed via the admin dashboard at `/admin/dashboard`.
-
-- **Projects**: Title, description, tech stack (comma-separated), repo URL, live URL, category
-- **Skills**: Name and category (frontend/backend/ml/languages/tools)
-- **Research**: Title, authors (comma-separated), venue, date, DOI URL, abstract
-- **Achievements**: Title, description, date, type (award/certification/deans_list/competitive/competition/project/other)
-- **Messages**: View-only list of contact form submissions
-
-The frontend uses local JSON files as fallback when the backend is unavailable. Edit files in `frontend/src/data/` to update fallback content.
-
-## Key Files Quick Reference
-
-| File | Purpose |
-|------|---------|
-| `frontend/src/lib/config.ts` | Site name, email, socials, education |
-| `frontend/src/data/*.json` | Fallback content data |
-| `frontend/src/app/globals.css` | All CSS animations, glass, glow, gradient utilities |
-| `frontend/src/components/FadeIn.tsx` | Reusable scroll-reveal wrapper |
-| `backend/.env` | All backend configuration |
-| `backend/src/app.module.ts` | Module wiring and DB config |
+No database provisioning required.

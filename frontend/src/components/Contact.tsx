@@ -27,7 +27,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="py-20 bg-gray-50 dark:bg-gray-800 relative overflow-hidden">
+    <section id="sarker-al-raian-meraj-contact" className="py-20 bg-gray-50 dark:bg-gray-800 relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-cyan-500/5 dark:from-blue-500/3 dark:via-purple-500/3 dark:to-cyan-500/3 rounded-full blur-[120px]" />
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">

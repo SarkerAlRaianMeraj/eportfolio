@@ -62,7 +62,7 @@ export default function ProjectDetail() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center pt-16 bg-white dark:bg-gray-900">
         <p className="text-gray-500 dark:text-gray-400 mb-4">{error || 'Project not found'}</p>
-        <Link href="/#projects" className="text-blue-600 hover:text-blue-700 dark:text-blue-400">
+        <Link href="/#sarker-al-raian-meraj-projects" className="text-blue-600 hover:text-blue-700 dark:text-blue-400">
           ← Back to Projects
         </Link>
       </div>
@@ -83,7 +83,7 @@ export default function ProjectDetail() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div variants={fadeUp}>
           <Link
-            href="/#projects"
+            href="/#sarker-al-raian-meraj-projects"
             className="inline-flex items-center text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-8 transition-colors group"
           >
             <span className="group-hover:-translate-x-1 transition-transform duration-200">←</span>

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { getSkills } from '@/lib/api';
 import { Skill } from '@/lib/types';
+import { skillsFallback } from '@/data/skills';
 
 const categoryLabels: Record<string, string> = {
   frontend: 'Frontend',
@@ -11,6 +11,9 @@ const categoryLabels: Record<string, string> = {
   ml: 'Machine Learning',
   languages: 'Languages',
   tools: 'Tools',
+  os: 'Operating Systems',
+  concepts: 'Concepts',
+  professional: 'Professional Skills',
 };
 
 const categoryGradients: Record<string, string> = {
@@ -19,6 +22,9 @@ const categoryGradients: Record<string, string> = {
   ml: 'from-purple-500 to-pink-400',
   languages: 'from-yellow-500 to-orange-400',
   tools: 'from-gray-500 to-slate-400',
+  os: 'from-teal-500 to-cyan-400',
+  concepts: 'from-rose-500 to-pink-400',
+  professional: 'from-amber-500 to-yellow-400',
 };
 
 const categoryBadgeColors: Record<string, string> = {
@@ -27,6 +33,9 @@ const categoryBadgeColors: Record<string, string> = {
   ml: 'bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border border-purple-100 dark:border-purple-900/50',
   languages: 'bg-yellow-50 text-yellow-700 dark:bg-yellow-950/50 dark:text-yellow-300 border border-yellow-100 dark:border-yellow-900/50',
   tools: 'bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700',
+  os: 'bg-teal-50 text-teal-700 dark:bg-teal-950/50 dark:text-teal-300 border border-teal-100 dark:border-teal-900/50',
+  concepts: 'bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-100 dark:border-rose-900/50',
+  professional: 'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-100 dark:border-amber-900/50',
 };
 
 const container = {
@@ -39,11 +48,16 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } },
 };
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+
 export default function Skills() {
-  const [skills, setSkills] = useState<Skill[]>([]);
+  const [skills, setSkills] = useState<Skill[]>(skillsFallback as Skill[]);
 
   useEffect(() => {
-    getSkills().then(setSkills);
+    fetch(`${API_URL}/skills`, { signal: AbortSignal.timeout(3000) })
+      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+      .then((data: Skill[]) => { if (data.length > 0) setSkills(data); })
+      .catch(() => {});
   }, []);
 
   const groupedSkills = skills.reduce((acc, skill) => {
@@ -55,7 +69,7 @@ export default function Skills() {
   }, {} as Record<string, Skill[]>);
 
   return (
-    <section id="skills" className="py-20 bg-gray-50 dark:bg-gray-800 relative overflow-hidden">
+    <section id="sarker-al-raian-meraj-skills" className="py-20 bg-gray-50 dark:bg-gray-800 relative overflow-hidden">
       {/* Decorative gradient blob */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/5 dark:bg-blue-400/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-80 h-80 bg-purple-500/5 dark:bg-purple-400/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />

@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AchievementsService } from './achievements.service';
 import { CreateAchievementDto } from './create-achievement.dto';
@@ -26,7 +35,10 @@ export class AchievementsController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  update(@Param('id') id: string, @Body() updateAchievementDto: UpdateAchievementDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateAchievementDto: UpdateAchievementDto,
+  ) {
     return this.achievementsService.update(id, updateAchievementDto);
   }
 

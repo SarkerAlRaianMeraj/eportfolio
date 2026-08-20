@@ -1,5 +1,3 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
-
 export enum AchievementType {
   AWARD = 'award',
   CERTIFICATION = 'certification',
@@ -10,27 +8,11 @@ export enum AchievementType {
   OTHER = 'other',
 }
 
-@Entity('achievements')
-export class Achievement {
-  @PrimaryGeneratedColumn('uuid')
+export interface Achievement {
   id: string;
-
-  @Column()
   title: string;
-
-  @Column('text', { nullable: true })
-  description: string;
-
-  @Column({ type: 'date', nullable: true })
-  date: string;
-
-  @Column({
-    type: 'enum',
-    enum: AchievementType,
-    default: AchievementType.OTHER,
-  })
+  description: string | null;
+  date: string | null;
   type: AchievementType;
-
-  @CreateDateColumn()
-  created_at: Date;
+  created_at: string;
 }
