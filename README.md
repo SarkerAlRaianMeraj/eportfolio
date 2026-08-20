@@ -78,6 +78,11 @@ Personal ePortfolio website showcasing projects, skills, research, and achieveme
 - **Scroll indicator** with bounce animation
 - **Section dividers** with gradient accent lines
 
+### Phase 7 — Custom Anchors & Deployment
+- Section anchors renamed to `#sarker-al-raian-meraj-*` pattern
+- Deployed frontend to Vercel
+- GitHub repository: https://github.com/SarkerAlRaianMeraj/eportfolio
+
 ## Architecture Notes
 
 ### Backend — In-Memory Storage
@@ -158,7 +163,7 @@ eportfolio/
 │       │   ├── users.service.ts    # In-memory user store, seedAdmin()
 │       │   └── user.entity.ts
 │       ├── projects/
-│       │   └── projects.service.ts # In-memory storage (3 seed projects)
+│       │   └── projects.service.ts # In-memory storage (2 seed projects)
 │       ├── skills/
 │       │   ├── skills.service.ts   # In-memory storage (48 seed skills)
 │       │   └── skill.entity.ts     # SkillCategory enum (8 values)
@@ -182,7 +187,7 @@ eportfolio/
 
 ```bash
 # Clone
-git clone <repo-url>
+git clone https://github.com/SarkerAlRaianMeraj/eportfolio.git
 cd eportfolio
 
 # Backend
@@ -317,6 +322,10 @@ The frontend uses TypeScript modules in `src/data/` as fallback when the backend
 4. **Backend data is ephemeral.** All data resets on server restart. The frontend fallback data ensures the portfolio always displays content.
 
 ## Deployment
+
+### Live
+- **Frontend**: https://frontend-ten-zeta-41.vercel.app
+- **GitHub**: https://github.com/SarkerAlRaianMeraj/eportfolio
 
 ### Frontend (Vercel)
 1. Push to GitHub
