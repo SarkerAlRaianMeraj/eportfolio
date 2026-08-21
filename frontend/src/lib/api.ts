@@ -1,4 +1,8 @@
 import { Project, Skill, Research, Achievement, ContactFormData, ContactMessage, User } from './types';
+import { projectsFallback } from '@/data/projects';
+import { skillsFallback } from '@/data/skills';
+import { researchFallback } from '@/data/research';
+import { achievementsFallback } from '@/data/achievements';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
@@ -61,13 +65,18 @@ export async function getProjects(): Promise<Project[]> {
   try {
     return await fetchApi<Project[]>('/projects');
   } catch {
-    const fallback = await import('@/data/projects.json');
-    return fallback.default as Project[];
+    return projectsFallback;
   }
 }
 
 export async function getProject(id: string): Promise<Project> {
-  return fetchApi<Project>(`/projects/${id}`);
+  try {
+    return await fetchApi<Project>(`/projects/${id}`);
+  } catch {
+    const fallback = projectsFallback.find((p) => p.id === id);
+    if (!fallback) throw new Error('Project not found');
+    return fallback;
+  }
 }
 
 export async function createProject(data: Partial<Project>): Promise<Project> {
@@ -93,8 +102,7 @@ export async function getSkills(): Promise<Skill[]> {
   try {
     return await fetchApi<Skill[]>('/skills');
   } catch {
-    const fallback = await import('@/data/skills.json');
-    return fallback.default as Skill[];
+    return skillsFallback;
   }
 }
 
@@ -121,8 +129,7 @@ export async function getResearch(): Promise<Research[]> {
   try {
     return await fetchApi<Research[]>('/research');
   } catch {
-    const fallback = await import('@/data/research.json');
-    return fallback.default as Research[];
+    return researchFallback;
   }
 }
 
@@ -149,8 +156,7 @@ export async function getAchievements(): Promise<Achievement[]> {
   try {
     return await fetchApi<Achievement[]>('/achievements');
   } catch {
-    const fallback = await import('@/data/achievements.json');
-    return fallback.default as Achievement[];
+    return achievementsFallback;
   }
 }
 
