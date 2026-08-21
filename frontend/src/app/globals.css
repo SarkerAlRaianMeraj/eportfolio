@@ -1,13 +1,16 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --background: #0a0a0a;
+  --foreground: #ededed;
   --accent-blue: #2563eb;
   --accent-purple: #9333ea;
   --accent-cyan: #06b6d4;
-  --glow-blue: rgba(37, 99, 235, 0.4);
-  --glow-purple: rgba(147, 51, 234, 0.4);
+  --glow-blue: rgba(96, 165, 250, 0.3);
+  --glow-purple: rgba(192, 132, 252, 0.3);
 }
 
 @theme inline {
@@ -15,19 +18,6 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --glow-blue: rgba(96, 165, 250, 0.3);
-    --glow-purple: rgba(192, 132, 252, 0.3);
-  }
-}
-
-html {
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 body {
@@ -106,13 +96,9 @@ body {
 
 /* Glass morphism */
 .glass {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(17, 24, 39, 0.7);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-}
-
-.dark .glass {
-  background: rgba(17, 24, 39, 0.7);
 }
 
 /* Gradient text */
@@ -201,12 +187,8 @@ body {
 
 /* Grid dot pattern */
 .dot-pattern {
-  background-image: radial-gradient(circle, rgba(148, 163, 184, 0.15) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
-.dark .dot-pattern {
   background-image: radial-gradient(circle, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 /* Gradient line */
