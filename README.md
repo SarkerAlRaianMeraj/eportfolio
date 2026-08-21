@@ -9,7 +9,7 @@ Personal ePortfolio website showcasing projects, skills, research, and achieveme
 | **Frontend** | Next.js 16, React 19, TypeScript 5, Tailwind CSS 4, Framer Motion |
 | **Backend** | NestJS 11, TypeScript (in-memory storage, no database) |
 | **Auth** | JWT (passport-jwt), bcrypt |
-| **Deployment** | Vercel (frontend), Render or any Node host (backend) |
+| **Deployment** | Vercel (frontend), Render (backend) |
 
 ## Features
 
@@ -23,7 +23,7 @@ Personal ePortfolio website showcasing projects, skills, research, and achieveme
 - JWT authentication (login, profile)
 - Admin dashboard (`/admin`) with CRUD for all content modules
 - Admin user auto-seeded on backend startup (configurable via env vars)
-- Dark/light mode toggle with localStorage persistence
+- Dark-only theme (light mode removed)
 - Project detail pages (`/projects/[id]`)
 
 ### Phase 3 — SEO & Accessibility
@@ -83,6 +83,16 @@ Personal ePortfolio website showcasing projects, skills, research, and achieveme
 - Deployed frontend to Vercel
 - GitHub repository: https://github.com/SarkerAlRaianMeraj/eportfolio
 
+### Phase 8 — Dark-Only Theme, Working Contact Email & Production Deploy
+- Light mode removed entirely: permanent `dark` class on `<html>`, Tailwind v4 `@custom-variant dark`, CSS variables hardcoded to dark values, `color-scheme: dark`
+- Theme toggle buttons removed from navbar; `theme-provider.tsx` deleted
+- Project detail pages (`/projects/[id]`) now fall back to local typed data when the API is unreachable (previously showed "Project not found" for every visitor)
+- All API getters fall back to typed `.ts` modules instead of `.json`
+- Contact email fixed: real Resend credentials configured, delivery status surfaced (`email_sent` field in the `POST /api/contact` response), failures logged with the Resend error body instead of being swallowed
+- Frontend API timeout raised 3s → 10s (Render free-tier cold starts)
+- Backend deployed to Render: https://eportfolio-backend-8nr8.onrender.com
+- Frontend wired to the production backend via `NEXT_PUBLIC_API_URL` set on Vercel
+
 ## Architecture Notes
 
 ### Backend — In-Memory Storage
@@ -95,9 +105,15 @@ The backend uses **no database**. All data is stored in-memory with seed data in
 Components load content **instantly** from local TypeScript modules (`src/data/*.ts`), then optionally try the API in the background. This ensures:
 - Content is always visible even when the backend is offline
 - No empty sections or loading spinners for portfolio content
-- API data replaces fallback if available (with 3s timeout)
+- API data replaces fallback if available (with 10s timeout)
 
 **Important**: Fallback data files use `.ts` (not `.json`) because Next.js 16 Turbopack silently fails to import JSON default exports during SSR. Always use typed `.ts` modules for fallback data.
+
+### Theming — Dark Only
+Light mode was removed. `<html>` carries a permanent `dark` class, Tailwind v4 maps the `dark:` variant to that class via `@custom-variant dark`, and all CSS variables in `globals.css` are hardcoded to dark values. There is no runtime theme switching, no toggle UI, and no persisted preference.
+
+### Contact Email — Resend
+`POST /api/contact` stores the message in memory and sends a notification email through Resend to `CONTACT_EMAIL`. The endpoint awaits delivery and returns `email_sent: true/false`. With the free-tier sender (`onboarding@resend.dev`), Resend only delivers to the email address the Resend account is registered with; delivering to other addresses requires verifying a custom domain in Resend and changing the `from` field in `contact.service.ts`.
 
 ## Project Structure
 
@@ -108,7 +124,7 @@ eportfolio/
 │   │   └── resume.pdf              # Downloadable resume
 │   └── src/
 │       ├── app/
-│       │   ├── layout.tsx          # Root layout, ThemeProvider, SEO, JSON-LD
+│       │   ├── layout.tsx          # Root layout, SEO, JSON-LD
 │       │   ├── page.tsx            # Home page (all sections)
 │       │   ├── globals.css         # Tailwind, animations, glass, glow utilities
 │       │   ├── not-found.tsx       # 404 page
@@ -140,10 +156,9 @@ eportfolio/
 │       │   ├── research.ts         # Fallback research data (typed TS module)
 │       │   └── achievements.ts     # Fallback achievement data (typed TS module)
 │       └── lib/
-│           ├── api.ts              # API client with 3s timeout
+│           ├── api.ts              # API client with 10s timeout
 │           ├── config.ts           # Site metadata (name, email, socials, education)
 │           ├── types.ts            # TypeScript interfaces
-│           ├── theme-provider.tsx  # Dark/light mode context
 │           └── use-in-view.ts      # IntersectionObserver hook
 │
 ├── backend/
@@ -172,7 +187,7 @@ eportfolio/
 │       ├── achievements/
 │       │   └── achievements.service.ts # In-memory storage (4 seed entries)
 │       └── contact/
-│           └── contact.service.ts  # In-memory message storage, XSS-safe
+│           └── contact.service.ts  # In-memory storage, XSS-safe, Resend email notification
 │
 ├── .env.example                    # Template for all env vars
 └── README.md
@@ -218,9 +233,8 @@ Open http://localhost:3000
 
 ### Admin Access
 
-1. Start the backend (it auto-seeds the admin user)
-2. Go to http://localhost:3000/admin
-3. Login with credentials from `backend/.env` (default: admin@portfolio.com / admin123)
+1. **Local**: start the backend (it auto-seeds the admin user), open http://localhost:3000/admin, log in with the credentials from `backend/.env`
+2. **Production**: open https://frontend-ten-zeta-41.vercel.app/admin — it authenticates against the Render backend using the `ADMIN_EMAIL` / `ADMIN_PASSWORD` env vars configured on Render (secret values live only in the Render dashboard, never in this repo)
 
 ## Environment Variables
 
@@ -240,6 +254,8 @@ Open http://localhost:3000
 |----------|-------------|---------|
 | `NEXT_PUBLIC_API_URL` | Backend API base URL | `http://localhost:3001/api` |
 
+In production this variable is set on Vercel (`https://eportfolio-backend-8nr8.onrender.com/api`). It is baked into the client bundle at build time — changing it requires a redeploy.
+
 ## API Endpoints
 
 ### Public
@@ -251,7 +267,7 @@ Open http://localhost:3000
 | GET | `/api/skills/:id` | Get skill by ID |
 | GET | `/api/research` | List all research |
 | GET | `/api/achievements` | List all achievements |
-| POST | `/api/contact` | Submit contact message |
+| POST | `/api/contact` | Submit contact message (returns message + `email_sent`) |
 
 ### Authenticated (JWT Bearer)
 | Method | Endpoint | Description |
@@ -321,25 +337,32 @@ The frontend uses TypeScript modules in `src/data/` as fallback when the backend
 
 4. **Backend data is ephemeral.** All data resets on server restart. The frontend fallback data ensures the portfolio always displays content.
 
+5. **Resend free-tier sender restriction.** `onboarding@resend.dev` can only deliver to the Resend account owner's email address. To notify other addresses, verify a custom domain in Resend and change the `from` field in `contact.service.ts`.
+
+6. **Vercel deploys are manual.** The Vercel project has no GitHub Git-integration connected — pushing to `master` does not deploy. Run `vercel --prod` from `frontend/` after pushing, or connect the repo in the Vercel dashboard (Settings → Git) to enable auto-deploys.
+
 ## Deployment
 
 ### Live
-- **Frontend**: https://frontend-ten-zeta-41.vercel.app
+- **Frontend**: https://frontend-ten-zeta-41.vercel.app (Vercel)
+- **Backend**: https://eportfolio-backend-8nr8.onrender.com (Render free tier)
 - **GitHub**: https://github.com/SarkerAlRaianMeraj/eportfolio
 
 ### Frontend (Vercel)
-1. Push to GitHub
-2. Import repo on Vercel
-3. Set framework to Next.js
-4. Add env var: `NEXT_PUBLIC_API_URL=https://your-backend.onrender.com/api`
-5. Deploy
+Deployed via Vercel CLI (`vercel --prod` from `frontend/`). Environment variables (set once via `vercel env add`):
+- `NEXT_PUBLIC_API_URL=https://eportfolio-backend-8nr8.onrender.com/api` (Production)
 
-### Backend (Render or any Node host)
-1. Create a new Web Service
-2. Connect GitHub repo
-3. Set build command: `cd backend && npm install && npm run build`
-4. Set start command: `cd backend && npm run start:prod`
-5. Add backend env vars (`JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`)
-6. Deploy
+### Backend (Render)
+Deployed as a Render Web Service connected to this GitHub repo:
+- **Root Directory:** `backend`
+- **Build Command:** `npm install && npm run build`
+- **Start Command:** `npm run start:prod`
+- **Environment variables:** `JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `RESEND_API_KEY`, `CONTACT_EMAIL=sarkarshariartasnim@gmail.com`, `FRONTEND_URL=https://frontend-ten-zeta-41.vercel.app`, `NODE_VERSION=22`
+- Secret values live only in the Render dashboard — never commit them to this repo
 
 No database provisioning required.
+
+### Operational notes (free tiers)
+- **Cold starts:** Render sleeps after ~15 minutes idle; the next request takes ~30–60 s to wake. The frontend uses a 10 s fetch timeout, so a very cold first request may need one retry.
+- **Ephemeral data:** backend storage is in-memory. Contact messages and admin-dashboard edits reset whenever Render restarts or redeploys. The frontend's local fallback data (`src/data/*.ts`) is the permanent source of truth.
+- **Email quota:** Resend free tier allows ~100 emails/day, sent from `onboarding@resend.dev` to the Resend account owner's address only.
