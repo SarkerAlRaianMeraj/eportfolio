@@ -21,7 +21,7 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 3000);
+  const timeout = setTimeout(() => controller.abort(), 10000);
 
   const res = await fetch(`${API_URL}${endpoint}`, {
     headers,

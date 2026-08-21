@@ -40,7 +40,7 @@ export default function Projects() {
   const [projects, setProjects] = useState<Project[]>(projectsFallback as Project[]);
 
   useEffect(() => {
-    fetch(`${API_URL}/projects`, { signal: AbortSignal.timeout(3000) })
+    fetch(`${API_URL}/projects`, { signal: AbortSignal.timeout(10000) })
       .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
       .then((data: Project[]) => { if (data.length > 0) setProjects(data); })
       .catch(() => {});

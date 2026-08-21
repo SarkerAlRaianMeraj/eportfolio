@@ -20,7 +20,9 @@ export class ContactService {
 
   constructor(private configService: ConfigService) {}
 
-  create(createContactDto: CreateContactDto): ContactMessage {
+  async create(
+    createContactDto: CreateContactDto,
+  ): Promise<ContactMessage & { email_sent: boolean }> {
     const message: ContactMessage = {
       id: String(this.nextId++),
       name: createContactDto.name,
@@ -30,18 +32,18 @@ export class ContactService {
     };
     this.messages.push(message);
 
-    void this.sendEmailNotification(createContactDto);
+    const email_sent = await this.sendEmailNotification(createContactDto);
 
-    return { ...message };
+    return { ...message, email_sent };
   }
 
-  private async sendEmailNotification(dto: CreateContactDto): Promise<void> {
+  private async sendEmailNotification(dto: CreateContactDto): Promise<boolean> {
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
     const contactEmail = this.configService.get<string>('CONTACT_EMAIL');
 
     if (!apiKey || !contactEmail) {
       this.logger.warn('Email not configured - message saved to database only');
-      return;
+      return false;
     }
 
     try {
@@ -52,7 +54,7 @@ export class ContactService {
       const safeEmail = escapeHtml(dto.email);
       const safeMessage = escapeHtml(dto.message);
 
-      await resend.emails.send({
+      const { data, error } = await resend.emails.send({
         from: 'Portfolio Contact <onboarding@resend.dev>',
         to: contactEmail,
         subject: `New Contact from ${safeName}`,
@@ -65,9 +67,19 @@ export class ContactService {
         `,
       });
 
-      this.logger.log('Email notification sent successfully');
+      if (error) {
+        this.logger.error(
+          `Failed to send email notification: ${JSON.stringify(error)}`,
+        );
+        return false;
+      }
+
+      this.logger.log(`Email notification sent successfully (id: ${data?.id})`);
+      return true;
     } catch (error) {
-      this.logger.error('Failed to send email notification', error);
+      const detail = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to send email notification: ${detail}`);
+      return false;
     }
   }
 
