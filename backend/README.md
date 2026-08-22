@@ -1,98 +1,77 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# ePortfolio Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+NestJS 11 REST API. **No database** — all data lives in memory and is seeded on startup. JWT authentication, Resend-powered contact emails. See the [root README](../README.md) for full project context.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Scripts
 
-## Description
+| Command | Description |
+|---------|-------------|
+| `npm run start:dev` | Dev server with watch/reload |
+| `npm run build` | Compile to `dist/` |
+| `npm run start:prod` | Run compiled build (`node dist/main`) |
+| `npm test` | Jest unit tests |
+| `npm run test:e2e` | E2E tests |
+| `npm run lint` | ESLint (with auto-fix) |
+| `npm run format` | Prettier |
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Structure
 
-## Project setup
-
-```bash
-$ npm install
+```
+src/
+├── main.ts                # Bootstrap: CORS (FRONTEND_URL), ValidationPipe, global prefix /api, port 3001
+├── app.module.ts          # Module wiring — no database, no TypeORM
+├── auth/                  # POST /login, GET /profile — bcryptjs + passport-jwt, ConfigService-based secret
+├── users/                 # In-memory user store, seedAdmin() on startup from env vars
+├── projects/              # In-memory CRUD (2 seed projects)
+├── skills/                # In-memory CRUD (48 seed skills, SkillCategory enum with 8 values)
+├── research/              # In-memory CRUD (1 seed entry)
+├── achievements/          # In-memory CRUD (4 seed entries)
+└── contact/               # Public POST (rate-limited), authenticated GET, Resend email notification
 ```
 
-## Compile and run the project
+## Design Notes
+
+- **In-memory storage by design.** Everything resets on restart/redeploy. The frontend's `src/data/*.ts` modules are the permanent source of truth.
+- **Admin auto-seeding.** On startup an admin user is created from `ADMIN_EMAIL` / `ADMIN_PASSWORD` if not present.
+- **JWT secret is mandatory.** Startup throws if `JWT_SECRET` is unset.
+- **Strict TypeScript** — `noImplicitAny`, `strictBindCallApply`, `noFallthroughCasesInSwitch`.
+- **Contact email.** `POST /api/contact` stores the message, sends a Resend notification to `CONTACT_EMAIL`, and returns `email_sent: true/false`. Failures are logged with the Resend error body. Free-tier sender (`onboarding@resend.dev`) only delivers to the account owner's address — verify a custom domain and change the `from` field in `contact.service.ts` for anything else.
+- **XSS-safe output** in the contact service.
+
+## Environment Variables
+
+`.env` (gitignored — template in [`../.env.example`](../.env.example)):
+
+| Variable | Required | Default |
+|----------|----------|---------|
+| `JWT_SECRET` | Yes | — (throws without it) |
+| `RESEND_API_KEY` | For contact emails | — |
+| `CONTACT_EMAIL` | For contact emails | — |
+| `ADMIN_EMAIL` | No | provided default |
+| `ADMIN_PASSWORD` | No | provided default |
+| `PORT` | No | `3001` |
+| `FRONTEND_URL` | No | `http://localhost:3000` |
+
+## API
+
+Full endpoint tables (public + JWT-authenticated CRUD for all content modules) are in the [root README](../README.md#api-endpoints). All routes live under the `/api` prefix.
+
+## Development
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
+npm run start:dev    # http://localhost:3001/api
 ```
 
-## Run tests
+Log into the frontend admin at `http://localhost:3000/admin` with the seeded credentials.
 
-```bash
-# unit tests
-$ npm run test
+## Deployment (Render)
 
-# e2e tests
-$ npm run test:e2e
+Render Web Service connected to this GitHub repo:
 
-# test coverage
-$ npm run test:cov
-```
+- **Root Directory:** `backend`
+- **Build Command:** `npm install && npm run build`
+- **Start Command:** `npm run start:prod`
+- **Env vars:** `JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `RESEND_API_KEY`, `CONTACT_EMAIL`, `FRONTEND_URL=https://frontend-ten-zeta-41.vercel.app`, `NODE_VERSION=22`
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Live at https://eportfolio-backend-8nr8.onrender.com (free tier — sleeps after ~15 min idle, ~30–60 s cold starts). Secret values live only in the Render dashboard.

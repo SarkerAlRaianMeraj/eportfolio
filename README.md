@@ -93,6 +93,13 @@ Personal ePortfolio website showcasing projects, skills, research, and achieveme
 - Backend deployed to Render: https://eportfolio-backend-8nr8.onrender.com
 - Frontend wired to the production backend via `NEXT_PUBLIC_API_URL` set on Vercel
 
+### Phase 9 — Resume Update & Vercel Link Repair
+- Replaced `frontend/public/resume.pdf` with the latest CV (kept the `resume.pdf` filename so the navbar links at `Navbar.tsx` needed no changes)
+- Verified the live file after deploy (`GET /resume.pdf` → 200, correct byte count)
+- Fixed Vercel CLI "Not authorized" deploy error caused by a stale org ID in `.vercel/project.json`
+- Relinked the frontend directory with `vercel link --yes --project frontend`, which refreshed `.vercel/project.json` and wrote a fresh OIDC token into `.env.local`
+- Added `.env*` to `frontend/.gitignore` (done automatically by the relink)
+
 ## Architecture Notes
 
 ### Backend — In-Memory Storage
@@ -300,6 +307,33 @@ All content is managed via the admin dashboard at `/admin/dashboard`.
 
 The frontend uses TypeScript modules in `src/data/` as fallback when the backend is unavailable. Edit these files to update fallback content.
 
+## Resume (CV) Maintenance
+
+The downloadable CV lives at `frontend/public/resume.pdf` and is served statically at `/resume.pdf`. The navbar links to it in two places (`frontend/src/components/Navbar.tsx`, desktop + mobile menu).
+
+To swap in a new CV:
+
+1. Replace the file, **keeping the filename** `resume.pdf` — no code changes are needed:
+   ```powershell
+   Remove-Item frontend\public\resume.pdf -Force
+   Copy-Item "$HOME\Downloads\CV.pdf" -Destination frontend\public\resume.pdf
+   ```
+2. Commit and push:
+   ```bash
+   git add frontend/public/resume.pdf
+   git commit -m "update resume.pdf with latest CV"
+   git push origin master
+   ```
+3. Deploy manually (Vercel has no Git integration — see Gotcha 6):
+   ```bash
+   cd frontend && vercel --prod
+   ```
+4. Verify the live file serves the new bytes:
+   ```powershell
+   (Invoke-WebRequest -Uri "https://frontend-ten-zeta-41.vercel.app/resume.pdf" -Method Head -UseBasicParsing).Headers['Content-Length']
+   ```
+   Compare against `(Get-Item frontend\public\resume.pdf).Length`.
+
 ## Skills Categories
 
 48 skills across 8 categories:
@@ -341,6 +375,13 @@ The frontend uses TypeScript modules in `src/data/` as fallback when the backend
 
 6. **Vercel deploys are manual.** The Vercel project has no GitHub Git-integration connected — pushing to `master` does not deploy. Run `vercel --prod` from `frontend/` after pushing, or connect the repo in the Vercel dashboard (Settings → Git) to enable auto-deploys.
 
+7. **Stale `.vercel/project.json` causes "Not authorized" on deploy.** If `vercel --prod` fails with `Error: Not authorized` while `vercel whoami` still works, the linked org ID in `.vercel/project.json` no longer matches any team on the account. Diagnose with `vercel teams ls` and compare against the `orgId` in the file, then relink:
+   ```bash
+   cd frontend
+   vercel link --yes --project frontend
+   ```
+   The relink rewrites `.vercel/project.json` with fresh IDs and downloads a new OIDC token into `.env.local`. `.env.local` is gitignored and must never be committed.
+
 ## Deployment
 
 ### Live
@@ -351,6 +392,8 @@ The frontend uses TypeScript modules in `src/data/` as fallback when the backend
 ### Frontend (Vercel)
 Deployed via Vercel CLI (`vercel --prod` from `frontend/`). Environment variables (set once via `vercel env add`):
 - `NEXT_PUBLIC_API_URL=https://eportfolio-backend-8nr8.onrender.com/api` (Production)
+
+The local link metadata lives in `frontend/.vercel/project.json`. If deploys start failing with "Not authorized", the org ID there is stale — relink with `vercel link --yes --project frontend` (see Gotcha 7).
 
 ### Backend (Render)
 Deployed as a Render Web Service connected to this GitHub repo:

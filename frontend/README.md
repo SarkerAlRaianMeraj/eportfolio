@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ePortfolio Frontend
 
-## Getting Started
+Next.js 16 (App Router, Turbopack) + React 19 + TypeScript + Tailwind CSS v4 + Framer Motion. Dark-only theme. See the [root README](../README.md) for full project context.
 
-First, run the development server:
+## Scripts
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Dev server (Turbopack) |
+| `npm run build` | Production build |
+| `npm run start` | Serve production build |
+| `npm run lint` | ESLint |
+
+## Structure
+
+```
+src/
+├── app/
+│   ├── layout.tsx          # Root layout, SEO metadata, JSON-LD Person schema
+│   ├── page.tsx            # Home page (all portfolio sections)
+│   ├── globals.css         # Tailwind v4 setup, dark-only variables, glass/glow/gradient utilities
+│   ├── not-found.tsx       # 404 page
+│   ├── loading.tsx         # Global loading spinner
+│   ├── error.tsx           # Error boundary
+│   ├── sitemap.ts          # /sitemap.xml
+│   ├── robots.ts           # /robots.txt
+│   ├── admin/
+│   │   ├── page.tsx        # Login
+│   │   └── dashboard/page.tsx  # CRUD dashboard (Projects, Skills, Research, Achievements, Messages)
+│   └── projects/[id]/page.tsx  # Project detail (falls back to local data if API unreachable)
+├── components/             # Navbar, Hero, About, Skills, Projects, Research,
+│                           # Achievements, Contact, Footer, FadeIn
+├── data/                   # Typed TS fallback data — the permanent source of truth
+└── lib/
+    ├── api.ts              # API client with 10s timeout (Render cold starts)
+    ├── config.ts           # Site name, email, socials, education
+    ├── types.ts            # Shared interfaces
+    └── use-in-view.ts      # IntersectionObserver hook
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Key Conventions
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Fallback-first data loading** — components render instantly from `src/data/*.ts`, then try the API in the background and replace content if it responds.
+2. **Never use `.json` for fallback data.** Next.js 16 Turbopack silently fails to import JSON default exports during SSR, producing empty sections.
+3. **Dark-only theme.** `<html>` has a permanent `dark` class; Tailwind's `dark:` variant maps to it via `@custom-variant dark` in `globals.css`. There is no toggle UI or light mode.
+4. **`FadeIn` wrapper conflicts.** Only wrap components that don't use their own `whileInView` animations (currently only `About`), otherwise animations fire twice.
+5. **Framer Motion is used throughout** — staggered entrances, scroll-aware navbar, timeline draw-ins. Keep new sections consistent with this pattern.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment Variables
 
-## Learn More
+`.env.local` (gitignored):
 
-To learn more about Next.js, take a look at the following resources:
+| Variable | Default |
+|----------|---------|
+| `NEXT_PUBLIC_API_URL` | `http://localhost:3001/api` |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Baked into the client bundle at build time — changing it requires a dev-server restart locally or a redeploy in production. Note: `vercel link` writes a `VERCEL_OIDC_TOKEN` here automatically; never commit this file.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Development
 
-## Deploy on Vercel
+```bash
+npm install
+npm run dev        # http://localhost:3000
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The backend must be running for admin/auth flows (`cd ../backend && npm run start:dev`). Public pages work without it thanks to fallback data.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deployment (Vercel)
+
+Deploys are **manual** — the Vercel project has no Git integration:
+
+```bash
+vercel --prod
+```
+
+Production env var: `NEXT_PUBLIC_API_URL=https://eportfolio-backend-8nr8.onrender.com/api` (set once via `vercel env add`).
+
+Link state lives in `.vercel/project.json`. If `vercel --prod` fails with `Error: Not authorized` while `vercel whoami` works, the org ID is stale — relink with:
+
+```bash
+vercel link --yes --project frontend
+```
+
+## Resume
+
+The downloadable CV is served statically from `public/resume.pdf` (navbar links point at `/resume.pdf`). Replace the file keeping the same filename; see the root README for the full update-and-deploy procedure.
